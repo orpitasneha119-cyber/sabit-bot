@@ -1,8 +1,8 @@
-const { state, saveCreds } = await useMultiFileAuthState('./');
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, Browsers } = require("@whiskeysockets/baileys");
 const pino = require("pino");
 const http = require("http");
 
-// রেন্ডার পোর্ট রিকোয়েরমেন্ট পূরণের জন্য ডামি সার্ভার
+// রেন্ডার পোর্ট মেইনটেইন করার জন্য মিনি সার্ভার
 const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('Bot is running successfully!\n');
@@ -14,7 +14,7 @@ server.listen(PORT, () => {
 });
 
 async function startBot() {
-    const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys');
+    const { state, saveCreds } = await useMultiFileAuthState('./');
     const { version } = await fetchLatestBaileysVersion();
     
     const sock = makeWASocket({
@@ -28,26 +28,15 @@ async function startBot() {
         browser: Browsers.macOS("Chrome")
     });
 
-    if (!sock.authState.creds.registered) {
-        const phoneNumber = "8801716627500"; // আপনার বিজনেস নাম্বার
-        setTimeout(async () => {
-            try {
-                let code = await sock.requestPairingCode(phoneNumber);
-                code = code?.match(/.{1,4}/g)?.join("-") || code;
-                console.log(`\n========================================`);
-                console.log(`YOUR PAIRING CODE IS : ${code}`);
-                console.log(`========================================\n`);
-            } catch (err) {
-                console.log("Pairing code error, retrying...");
-            }
-        }, 6000);
-    }
-
     sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect } = update;
         if (connection === 'close') {
             const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-            if (shouldReconnect) { startBot(); }
+            if (shouldReconnect) { 
+                startBot(); 
+            } else {
+                console.log('Connection closed. You are logged out.');
+            }
         } else if (connection === 'open') {
             console.log('Bot successfully connected to WhatsApp!');
         }
