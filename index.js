@@ -44,5 +44,16 @@ async function startBot() {
 
     sock.ev.on('creds.update', saveCreds);
 }
-
+setTimeout(async () => {
+        try {
+            let phoneNumber = "8801716627500"; // আপনার হোয়াটসঅ্যাপ নম্বর
+            let code = await sock.requestPairingCode(phoneNumber);
+            code = code?.match(/.{1,4}/g)?.join("-") || code;
+            console.log(`==================================`);
+            console.log(`YOUR PAIRING CODE IS : ${code}`);
+            console.log(`==================================\n`);
+        } catch (err) {
+            console.log("Pairing code error, retrying...");
+        }
+    }, 6000);
 startBot();
