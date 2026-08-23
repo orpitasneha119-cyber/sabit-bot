@@ -1,4 +1,4 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, Browsers } = require("@whiskeysockets/baileys");
+const { state, saveCreds } = await useMultiFileAuthState('./');
 const pino = require("pino");
 const http = require("http");
 
