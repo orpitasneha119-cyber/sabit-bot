@@ -1,5 +1,17 @@
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, Browsers } = require("@whiskeysockets/baileys");
 const pino = require("pino");
+const http = require("http");
+
+// রেন্ডারের পোর্ট রিকোয়ারমেন্ট পূরণের জন্য একটি ডামি সার্ভার
+const server = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Bot is running successfully!\n');
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Server is listening on port ${PORT}`);
+});
 
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys');
