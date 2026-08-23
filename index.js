@@ -1,6 +1,7 @@
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, Browsers } = require("@whiskeysockets/baileys");
 const pino = require("pino");
 const http = require("http");
+const fs = require('fs');
 
 // রেন্ডার পোর্ট মেইনটেইন করার জন্য মিনি সার্ভার
 const server = http.createServer((req, res) => {
@@ -14,7 +15,20 @@ server.listen(PORT, () => {
 });
 
 async function startBot() {
-    const { state, saveCreds } = await useMultiFileAuthState('./');
+    // সেশন আইডি থেকে সরাসরি ক্রেডেন্সিয়াল তৈরি করার ব্যবস্থা
+    const SESSION_ID = process.env.SESSION_ID || "এখানে_আপনার_সেশন_আইডি_বসাবেন";
+    
+    if (!fs.existsSync('./auth_info_baileys')) {
+        fs.mkdirSync('./auth_info_baileys');
+    }
+
+    if (SESSION_ID && !fs.existsSync('./auth_info_baileys/creds.json')) {
+        // যদি সেশন আইডি বেস64 (Base64) বা সাধারণ টেক্সট হয় তা ডিকোড করে সেভ করা
+        let sessData = SESSION_ID.includes('SESSION_ID_') ? SESSION_ID.replace('SESSION_ID_', '') : SESSION_ID;
+        fs.writeFileSync('./auth_info_baileys/creds.json', Buffer.from(sessData, 'base64').toString('utf-8'));
+    }
+
+    const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys');
     const { version } = await fetchLatestBaileysVersion();
     
     const sock = makeWASocket({
@@ -38,22 +52,11 @@ async function startBot() {
                 console.log('Connection closed. You are logged out.');
             }
         } else if (connection === 'open') {
-            console.log('Bot successfully connected to WhatsApp!');
+            console.log('Bot successfully connected to WhatsApp via Session ID!');
         }
     });
 
     sock.ev.on('creds.update', saveCreds);
 }
-setTimeout(async () => {
-        try {
-            let phoneNumber = "8801716627500"; // আপনার হোয়াটসঅ্যাপ নম্বর
-            let code = await sock.requestPairingCode(phoneNumber);
-            code = code?.match(/.{1,4}/g)?.join("-") || code;
-            console.log(`==================================`);
-            console.log(`YOUR PAIRING CODE IS : ${code}`);
-            console.log(`==================================\n`);
-        } catch (err) {
-            console.log("Pairing code error, retrying...");
-        }
-    }, 6000);
+
 startBot();
