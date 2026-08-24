@@ -1,7 +1,6 @@
 import express from 'express';
 import { makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } from '@whiskeysockets/baileys';
 import pino from 'pino';
-import NodeCache from 'node-cache';
 import http from 'http';
 
 const app = express();
@@ -15,16 +14,10 @@ const server = app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });
 
-// রেন্ডার সার্ভারকে জাগিয়ে রাখার জন্য সেলফ-পিং (Self-Ping) মেকানিজম
+// সেলফ-পিং মেকানিজম
 setInterval(() => {
-  http.get(`http://localhost:${PORT}`, (res) => {
-    // Keep alive ping
-  }).on('error', (err) => {
-    // Ignore error
-  });
-}, 5 * 60 * 1000); // প্রতি ৫ মিনিট পর পর নিজেকে পিং করবে
-
-const msgRetryCounterCache = new NodeCache();
+  http.get(`http://localhost:${PORT}`, (res) => {}).on('error', (err) => {});
+}, 5 * 60 * 1000);
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
@@ -34,7 +27,6 @@ async function startBot() {
     version,
     auth: state,
     logger: pino({ level: 'silent' }),
-    msgRetryCounterCache,
     generateHighQualityLinkPreview: true
   });
 
@@ -53,8 +45,6 @@ async function startBot() {
 
       if (!text) return;
       const textLower = text.toLowerCase().trim();
-
-      console.log(`Message received: ${textLower}`);
 
       if (textLower === '.menu' || textLower === '.help' || textLower === '.bot') {
         await sock.sendMessage(from, { text: '🤖 *Bot is active and running successfully!*\n\nCommands:\n* .menu\n* .ping' }, { quoted: mek });
