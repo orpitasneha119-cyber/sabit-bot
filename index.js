@@ -23,20 +23,6 @@ async function startBot() {
 
   sock.ev.on('creds.update', saveCreds);
 
-  if(!sock.authState.creds.registered) {
-    const phoneNumber = "8801716627500";
-    setTimeout(async () => {
-      try {
-        let code = await sock.requestPairingCode(phoneNumber);
-        console.log(`\n========================================`);
-        console.log(`YOUR PAIRING CODE IS: ${code}`);
-        console.log(`========================================\n`);
-      } catch (err) {
-        console.error('Error getting pairing code:', err);
-      }
-    }, 4000);
-  }
-
   sock.ev.on('connection.update', (update) => {
     const { connection } = update;
     if(connection === 'open') {
