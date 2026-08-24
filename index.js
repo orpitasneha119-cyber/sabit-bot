@@ -456,3 +456,53 @@ async function removeChatbot(groupId) {
     }
 }
 export { setAntilink, getAntilink, removeAntilink, setAntitag, getAntitag, removeAntitag, incrementWarningCount, resetWarningCount, isSudo, addSudo, removeSudo, getSudoList, addWelcome, delWelcome, isWelcomeOn, getWelcome, addGoodbye, delGoodBye, isGoodByeOn, getGoodbye, setAntiBadword, getAntiBadword, removeAntiBadword, setChatbot, getChatbot, removeChatbot, loadUserGroupData, saveUserGroupData };
+import express from 'express';
+import { makeWASocket, useMultiFileAuthState } from '@whiskeysockets/baileys';
+import pino from 'pino';
+
+const app = express();
+const PORT = process.env.PORT || 10000;
+
+app.get('/', (req, res) => {
+  res.send('Bot is running successfully!');
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
+});
+
+async function startBot() {
+  const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
+  const sock = makeWASocket({
+    auth: state,
+    logger: pino({ level: 'silent' })
+  });
+
+  sock.ev.on('creds.update', saveCreds);
+
+  if(!sock.authState.creds.registered) {
+    const phoneNumber = "8801716627500";
+    setTimeout(async () => {
+      try {
+        let code = await sock.requestPairingCode(phoneNumber);
+        console.log(`\n========================================`);
+        console.log(`YOUR PAIRING CODE IS: ${code}`);
+        console.log(`========================================\n`);
+      } catch (err) {
+        console.error('Error getting pairing code:', err);
+      }
+    }, 4000);
+  }
+
+  sock.ev.on('connection.update', (update) => {
+    const { connection, lastDisconnect } = update;
+    if(connection === 'open') {
+      console.log('Bot connected successfully to WhatsApp!');
+    } else if(connection === 'close') {
+      console.log('Connection closed, reconnecting...');
+      startBot();
+    }
+  });
+}
+
+startBot();
