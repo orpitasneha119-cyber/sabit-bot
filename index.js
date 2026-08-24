@@ -445,3 +445,14 @@ async function removeChatbot(groupId) {
     }
 }
 export { setAntilink, getAntilink, removeAntilink, setAntitag, getAntitag, removeAntitag, incrementWarningCount, resetWarningCount, isSudo, addSudo, removeSudo, getSudoList, addWelcome, delWelcome, isWelcomeOn, getWelcome, addGoodbye, delGoodBye, isGoodByeOn, getGoodbye, setAntiBadword, getAntiBadword, removeAntiBadword, setChatbot, getChatbot, removeChatbot, loadUserGroupData, saveUserGroupData };
+import express from 'express';
+const app = express();
+const PORT = process.env.PORT || 10000;
+
+app.get('/', (req, res) => {
+  res.send('Bot is running successfully!');
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
+});
