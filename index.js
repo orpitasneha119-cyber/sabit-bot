@@ -22,28 +22,32 @@ async function startBot() {
 
   sock.ev.on('creds.update', saveCreds);
 
-  sock.ev.on('messages.upsert', async (chatUpdate) => {
+  sock.ev.on('messages.upsert', async (m) => {
     try {
-      const mek = chatUpdate.messages[0];
-      if (!mek.message) return;
+      const msg = m.messages[0];
+      if (!msg.message || msg.key.fromMe) return;
+
+      const from = msg.key.remoteJid;
+      const type = Object.keys(msg.message)[0];
       
-      const from = mek.key.remoteJid;
-      const type = Object.keys(mek.message)[0];
-      
-      let body = (type === 'conversation') ? mek.message.conversation : 
-                 (type === 'extendedTextMessage') ? mek.message.extendedTextMessage.text : '';
+      let text = '';
+      if (type === 'conversation') {
+        text = msg.message.conversation;
+      } else if (type === 'extendedTextMessage') {
+        text = msg.message.extendedTextMessage.text;
+      }
 
-      if (!body) return;
+      if (!text) return;
 
-      console.log('Received message:', body);
+      console.log(`Received text: ${text}`);
 
-      if (body === '.menu' || body === '.help' || body === '.bot') {
-        await sock.sendMessage(from, { text: '🤖 *Bot is active and working perfectly!*\n\nCommands:\n* .menu\n* .ping' }, { quoted: mek });
-      } else if (body === '.ping') {
-        await sock.sendMessage(from, { text: 'Pong! 🏓 Bot is alive.' }, { quoted: mek });
+      if (text.toLowerCase() === '.menu' || text.toLowerCase() === '.help') {
+        await sock.sendMessage(from, { text: '🤖 *Bot is active!*\n\nCommands:\n* .menu\n* .ping' }, { quoted: msg });
+      } else if (text.toLowerCase() === '.ping') {
+        await sock.sendMessage(from, { text: 'Pong! 🏓' }, { quoted: msg });
       }
     } catch (err) {
-      console.error('Error in messages.upsert:', err);
+      console.error('Error handling message:', err);
     }
   });
 
