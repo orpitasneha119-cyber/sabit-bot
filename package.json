@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "start:optimized": "node index.js"
+    "start": "node server.js",
+    "start:optimized": "node server.js"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "latest",
+    "express": "^4.18.2",
     "pino": "^8.16.0"
   }
 }
