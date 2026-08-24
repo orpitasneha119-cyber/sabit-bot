@@ -1,14 +1,14 @@
 {
   "name": "sabit-bot",
   "version": "1.0.0",
-  "type": "module",
+  "description": "WhatsApp Bot",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "latest",
-    "express": "^4.18.2",
-    "pino": "^8.16.0"
+    "@whiskeysockets/baileys": "^6.7.0",
+    "pino": "^9.0.0"
   }
 }
