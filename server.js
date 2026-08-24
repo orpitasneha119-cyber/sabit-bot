@@ -1,6 +1,4 @@
-import express from 'express';
-import './index.js';
-
+const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
@@ -11,3 +9,6 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });
+
+// মূল বট ফাইল রান করার জন্য
+require('./index.js');
