@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "start:optimized": "node index.js"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "latest",
-    "pino": "^8.19.0"
+    "pino": "^8.16.0"
   }
 }
