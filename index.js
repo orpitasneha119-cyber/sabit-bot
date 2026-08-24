@@ -1,7 +1,6 @@
 import express from 'express';
 import { makeWASocket, useMultiFileAuthState, DisconnectReason } from '@whiskeysockets/baileys';
 import pino from 'pino';
-import fs from 'fs';
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -23,32 +22,28 @@ async function startBot() {
 
   sock.ev.on('creds.update', saveCreds);
 
-  // মেসেজ এবং কমান্ড হ্যান্ডলার
-  sock.ev.on('messages.upsert', async ({ messages }) => {
+  sock.ev.on('messages.upsert', async (chatUpdate) => {
     try {
-      const m = messages[0];
-      if (!m.message) return;
+      const mek = chatUpdate.messages[0];
+      if (!mek.message) return;
       
-      const messageType = Object.keys(m.message)[0];
-      const body = messageType === 'conversation' ? m.message.conversation : 
-                   messageType === 'extendedTextMessage' ? m.message.extendedTextMessage.text : '';
-
-      const from = m.key.remoteJid;
-      const isCmd = body.startsWith('.');
-      const command = isCmd ? body.slice(1).trim().split(' ')[0].toLowerCase() : '';
-
-
+      const from = mek.key.remoteJid;
+      const type = Object.keys(mek.message)[0];
       
+      let body = (type === 'conversation') ? mek.message.conversation : 
+                 (type === 'extendedTextMessage') ? mek.message.extendedTextMessage.text : '';
 
-      console.log(`Command received: ${command}`);
+      if (!body) return;
 
-      if (command === 'menu' || command === 'help') {
-        await sock.sendMessage(from, { text: '🤖 *Bot is active and working perfectly!*\n\nCommands:\n* .menu / .help\n* .ping' }, { quoted: m });
-      } else if (command === 'ping') {
-        await sock.sendMessage(from, { text: 'Pong! 🏓 Bot is alive.' }, { quoted: m });
+      console.log('Received message:', body);
+
+      if (body === '.menu' || body === '.help' || body === '.bot') {
+        await sock.sendMessage(from, { text: '🤖 *Bot is active and working perfectly!*\n\nCommands:\n* .menu\n* .ping' }, { quoted: mek });
+      } else if (body === '.ping') {
+        await sock.sendMessage(from, { text: 'Pong! 🏓 Bot is alive.' }, { quoted: mek });
       }
     } catch (err) {
-      console.error('Error handling message:', err);
+      console.error('Error in messages.upsert:', err);
     }
   });
 
