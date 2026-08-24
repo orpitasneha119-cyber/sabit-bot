@@ -37,6 +37,7 @@ async function startBot() {
       const isCmd = body.startsWith('.');
       const command = isCmd ? body.slice(1).trim().split(' ')[0].toLowerCase() : '';
 
+
       
 
       console.log(`Command received: ${command}`);
