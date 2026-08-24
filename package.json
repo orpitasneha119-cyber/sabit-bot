@@ -1,7 +1,6 @@
 {
   "name": "sabit-bot",
   "version": "1.0.0",
-  "description": "WhatsApp Bot",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
